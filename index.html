@@ -2423,6 +2423,14 @@
 
     video.addEventListener('ended', () => tile.classList.remove('is-playing'));
     video.addEventListener('error', () => {
+      // If the file isn't at videos/<name>.mp4, try the repo root (and vice versa) before giving up.
+      const orig = video.getAttribute('data-vsrc') || '';
+      if (orig && !video.dataset.triedAlt && video.src && video.src.indexOf('blob:') !== 0) {
+        video.dataset.triedAlt = '1';
+        video.src = orig.indexOf('videos/') === 0 ? orig.slice(7) : 'videos/' + orig;
+        video.play().catch(() => {});
+        return;
+      }
       tile.classList.remove('is-playing');
       toast.textContent = 'Video plays on the published site ✦';
       toast.classList.add('show');
